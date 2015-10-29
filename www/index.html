@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta charset="utf-8">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+		    <link rel="stylesheet" href="css/bootstrap.min.css">
+		    <link href="css/roboto.min.css" rel="stylesheet">
+        <link href="css/material.min.css" rel="stylesheet">
+        <link href="css/ripples.min.css" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet">
+        <title>Prochains Trains</title>
+    </head>
+    <body>
+        <div class="app">
+        	<div class="navbar navbar-default navbar-material-500 navbar-fixed-top">
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#"><span id="header-title">Prochains Trains</span><div class="ripple-wrapper"></div></a>
+              </div>
+              <div class="navbar-collapse collapse navbar-responsive-collapse">
+                <ul class="nav navbar-nav">
+                  <li><a href="#" class="reload-button"><span class="glyphicon glyphicon-repeat"></span> Actualiser</a></li>
+                  <li><a href="#" class="locate-button"><span class="glyphicon glyphicon-map-marker"></span> Gare la plus proche</a></li>
+                  <li><a href="#" class="search-button" data-toggle="modal" data-target="#station-search"><span class="glyphicon glyphicon-search"></span> Définir la gare</a></li>
+                  <li><a href="#" class="about-button"><span class="glyphicon glyphicon-info-sign"></span> A propos</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <button id="main-refresh-button" class="refresh-button btn btn-fab btn-raised btn-primary"><span class="glyphicon glyphicon-repeat"></span></button>
+
+              <table class="table table-striped" style="margin-top:50px;" id="trains-container">
+                <tr style="display:none;" id="train-template" class="train">
+                  <td class="first">
+                    <span class="data-container" data-mission="{{mission}}" data-num="{{num}}" data-dateLabel="{{date_label}}" data-dateFull="{{date_full}}" data-dateMin="{{date_min}}" data-dateSecond="{{date_Second}}" data-dest="{{dest}}" data-img="{{img}}"></span>
+                    <h1>{{mission}}</h1>
+                  </td>
+                  <td class="second">
+                    <h1>{{date_label}}</h1>
+                    <h2>{{dest}}</h2>
+                  </td>
+                </tr>
+              </table>
+
+
+
+              <div id="dialog" class="modal fade" tabindex="-1" style="display: none;" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                      <h4 class="modal-title" id="dialog-title">Avertissement</h4>
+                    </div>
+                    <div class="modal-body">
+                      <p id="dialog-content"></p>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-flat" data-dismiss="modal">Fermer</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="station-search" class="modal fade" tabindex="-1" style="display: none;" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                      <h4 class="modal-title" id="dialog-title">Définissez votre gare</h4>
+                    </div>
+                    <div class="modal-body">
+                      <br>
+                      <div class="form-control-wrapper"><input type="text" class="form-control empty" id="set-station-name-input"><div class="floating-label">Nom de la gare</div><span class="material-input"></span></div>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-primary" data-dismiss="modal" id="set-station-name-button">Définir</button>
+                      <button class="btn btn-flat" data-dismiss="modal">Fermer</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="train-info" class="modal fade" tabindex="-1" style="display: none;" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="card">
+
+                      <div class="card-height-indicator"></div>
+
+                      <div class="card-content">
+
+                          <div class="card-image">
+                              <img src="{{img}}" alt="Loading image...">
+                              <h3 class="card-image-headline">Train {{mission}} de {{date_full}}</h3>
+                          </div>
+
+                          <div class="card-body">
+                              <p>Train n°{{num}} à destination de <b>{{dest}}</b></p>
+                              <p>Arrivée prévu à {{current_station}} à <b>{{date_full}}</b> ({{date_min}} Min)</p>
+                          </div>
+
+                          <footer class="card-footer">
+                              <button class="btn btn-flat btn-flat pull-right" data-dismiss="modal">Fermer</button>
+                          </footer>
+
+                      </div>
+
+                    </div>
+                </div>
+              </div>
+            </div>
+
+              <div id="bottom-label">Tout va bien :)</div>
+
+              <div id="preload-container"></div>
+
+
+        </div>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/ripples.min.js"></script>
+        <script src="js/material.min.js"></script>
+        <script src="js/dateFormat.js"></script>
+        <script src="js/engine.js"></script>
+        <script src="js/locate.js"></script>
+        <script src="js/mustache.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                // This command is used to initialize some elements and make them work properly
+                $.material.init();
+            });
+        </script>
+    </body>
+</html>
